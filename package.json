@@ -4,7 +4,8 @@
   "description": "A Social Media Site For Developers (MERN)",
   "main": "server.js",
   "scripts": {
-    "test": "."
+    "start": "node server.js",
+    "server": "nodemon server.js"
   },
   "repository": {
     "type": "git",
