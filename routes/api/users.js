@@ -17,6 +17,9 @@ const passport = require("passport");
 //load input validation
 const validateRegistrationInput = require("../../validation/register");
 
+//Load login input validation
+const validateLoginInput = require('../../validation/login');
+
 //load user model
 const User = require("../../models/User");
 
@@ -34,7 +37,10 @@ router.get("/test", (req, res) =>
 //@access public
 //This will use findone to check if the email from the form exists with a user already. (the user model we brought in)
 router.post("/register", (req, res) => {
-  const { errors, isValid } = validateRegistrationInput(req.body);
+  const {
+    errors,
+    isValid
+  } = validateRegistrationInput(req.body);
   //check validation 1st step
   if (!isValid) {
     return res.status(400).json(errors);
@@ -88,27 +94,45 @@ router.post("/register", (req, res) => {
 //@desc login a user / Returning JWT
 //@access public
 router.post("/login", (req, res) => {
+
+  const {
+    errors,
+    isValid
+  } = validateLoginInput(req.body);
+  //check validation 1st step
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
   //find user by email
-  User.findOne({ email: email }).then(user => {
+  User.findOne({
+    email: email
+  }).then(user => {
     //check for user
     if (!user) {
-      return res.status(404).json({ email: "User not found!" });
+      errors.email = 'User not found!';
+      return res.status(404).json(errors);
     }
 
     //check password with bcrypt because the password in DB is encrypted
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
         //user matched include what you want in the payload
-        const payload = { id: user.id, name: user.name, avatar: user.avatar };
+        const payload = {
+          id: user.id,
+          name: user.name,
+          avatar: user.avatar
+        };
 
         //assign token
         jwt.sign(
           payload,
-          keys.secretOrKey,
-          { expiresIn: 3600 },
+          keys.secretOrKey, {
+            expiresIn: 3600
+          },
           (err, token) => {
             res.json({
               success: true,
@@ -117,7 +141,8 @@ router.post("/login", (req, res) => {
           }
         );
       } else {
-        return res.status(400).json({ password: "Password incorrect" });
+        errors.password = 'Password is incorrect!';
+        return res.status(400).json(errors);
       }
     });
   });
@@ -128,7 +153,9 @@ router.post("/login", (req, res) => {
 //@access private
 router.get(
   "/current",
-  passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", {
+    session: false
+  }),
   (req, res) => {
     res.json({
       user: req.user

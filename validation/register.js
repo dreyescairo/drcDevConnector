@@ -18,11 +18,14 @@ module.exports = function validateRegisterInput(data) {
   data.name = !isEmptyHelper(data.name) ? data.name : "";
   data.email = !isEmptyHelper(data.email) ? data.email : "";
   data.password = !isEmptyHelper(data.password) ? data.password : "";
-  data.passwordConfirm = !isEmptyHelper(data.passwordConfirm)
-    ? data.passwordConfirm
-    : "";
+  data.passwordConfirm = !isEmptyHelper(data.passwordConfirm) ?
+    data.passwordConfirm :
+    "";
 
-  if (!validator.isLength(data.name, { min: 2, max: 30 })) {
+  if (!validator.isLength(data.name, {
+      min: 2,
+      max: 30
+    })) {
     errors.name = "Name must be between 2 and 30 characters";
   }
   //then test name with validators isEmpty. (not sure why I have to use validators if my custom one should do the trick.)
@@ -38,7 +41,10 @@ module.exports = function validateRegisterInput(data) {
 
   if (validator.isEmpty(data.password)) {
     errors.password = "Password field is required";
-  } else if (!validator.isLength(data.password, { min: 6, max: 30 })) {
+  } else if (!validator.isLength(data.password, {
+      min: 6,
+      max: 30
+    })) {
     errors.password = "Password must be at least 6 characters";
   }
 
