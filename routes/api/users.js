@@ -157,8 +157,13 @@ router.get(
     session: false
   }),
   (req, res) => {
+
+    const errors = {};
+    //I got a user back from authenticationg in passport.js, from that user respond the properties that I want in json format.
     res.json({
-      user: req.user
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name
     });
   }
 );
