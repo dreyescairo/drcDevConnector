@@ -11,12 +11,8 @@ const profile = require("../../models/Profile");
 
 const user = require("../../models/User");
 
-//api/profile/test
-router.get("/test", (req, res) =>
-  res.json({
-    msg: "profile works"
-  })
-);
+//load validation script
+const validateProfileInput = require("../../validation/profile");
 
 //@route GET api/profile
 //@desc Get current users profile
@@ -36,36 +32,47 @@ router.get(
       .then(profile => {
         if (!profile) {
           errors.noProfile = "There is no profile for this user.";
-          return res.status(404).json;
+          return res.status(404).json(errors);
         }
 
         res.json(profile);
       })
-      .catch(err => res.status(404).json);
+      .catch(err => res.status(404).json(err));
   }
 );
 
 //@route POST api/profile
 //@desc Create or edit user profile
 //@access private
-router.post(
-  "/",
-  passport.authenticate("jwt", {
+router.post("/", passport.authenticate("jwt", {
     session: false
   }),
   (req, res) => {
-    //Get profile fields. We get our user because we are passing in a JWT with all the uder information.
-    const profileFields = {};
 
+    const {
+      errors,
+      isValid
+    } = validateProfileInput(req.body);
+
+    //check validation
+    if (!isValid) {
+      //return any errors with 400 status
+      return res.status(400).json(errors);
+    }
+
+    //Get profile fields. We get our user because we are passing in a JWT with all the uder information.   
+    //get field data    
+    const profileFields = {};
     profileFields.user = req.user.id;
+
     if (req.body.handle) {
       profileFields.handle = req.body.handle;
     }
     if (req.body.company) {
-      profileFields.handle = req.body.company;
+      profileFields.company = req.body.company;
     }
     if (req.body.website) {
-      profileFields.handle = req.body.website;
+      profileFields.website = req.body.website;
     }
     if (req.body.location) {
       profileFields.location = req.body.location;
@@ -106,32 +113,38 @@ router.post(
       profileFields.social.instagram = req.body.instagram;
     }
 
-    profile.findOne({ user: req.user.id }).then(profile => {
+    profile.findOne({
+      user: req.user.id
+    }).then(profile => {
       if (profile) {
         //update the profile
         profile
-          .findOneAndUpdate(
-            { user: req.user.id },
-            { $set: profileFields },
-            { new: true }
-          )
-          //Give the profile once we update.
-          .then(profile => res.json(profile));
+          .findOneAndUpdate({
+            user: req.user.id
+          }, {
+            $set: profileFields
+          }, {
+            new: true
+          }).then(profile => res.json(profile)).catch(err => console.log(err)); //Give the profile once we update.
       } else {
         //create the profile
 
         //Check if handle exists
-        profile.findOne({ handle: profileFields.handle }).then(profile => {
+        profile.findOne({
+          handle: profileFields.handle
+        }).then(profile => {
           if (profile) {
             errors.handle = "That handle already exists!";
             res.status(400).json(errors);
           }
-
           //save profile
-          new profile(profileFields).save().then(profile => res.json(profile));
-        });
+          new profile(profileFields).save().then(profile => res.json(profile)).catch(err => console.log(err));
+
+
+
+        }).catch(err => console.log(err));
       }
-    });
+    }).catch(err => console.log(err));
   }
 );
 

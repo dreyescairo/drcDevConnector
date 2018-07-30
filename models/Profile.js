@@ -125,6 +125,6 @@ const ProfileSchema = new Schema({
   }
 });
 
-const profile = mongoose.model('profile', ProfileSchema);
+const Profile = mongoose.model('profile', ProfileSchema);
 
-module.exports = profile;
+module.exports = Profile;
