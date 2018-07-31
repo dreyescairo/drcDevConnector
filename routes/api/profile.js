@@ -26,8 +26,9 @@ router.get(
     const errors = {};
 
     Profile.findOne({
-      user: req.user.id
-    })
+        user: req.user.id
+      })
+      .populate()
       .then(profile => {
         if (!profile) {
           errors.noProfile = "There is no profile for this user.";
@@ -49,7 +50,10 @@ router.post(
     session: false
   }),
   (req, res) => {
-    const { errors, isValid } = validateProfileInput(req.body);
+    const {
+      errors,
+      isValid
+    } = validateProfileInput(req.body);
 
     //check validation
     if (!isValid) {
@@ -116,23 +120,19 @@ router.post(
     //This allowed me to keep the instance I had for Model, and have the return data in a lowercase profile model so I can manipulate it without
     //overwriting my imported Profile model. Make sense? I hope so because this took me forever to pin point...
     Profile.findOne({
-      user: req.user.id
-    })
+        user: req.user.id
+      })
       .then(profile => {
         if (profile) {
           //update the profile
-          profile
-            .findOneAndUpdate(
-              {
-                user: req.user.id
-              },
-              {
-                $set: profileFields
-              },
-              {
-                new: true
-              }
-            )
+          Profile
+            .findOneAndUpdate({
+              user: req.user.id
+            }, {
+              $set: profileFields
+            }, {
+              new: true
+            })
             .then(profile => res.json(profile))
             .catch(err => console.log(err)); //Give the profile once we update.
         } else {
@@ -140,8 +140,8 @@ router.post(
 
           //Check if handle exists
           Profile.findOne({
-            handle: profileFields.handle
-          })
+              handle: profileFields.handle
+            })
             .then(profile => {
               if (profile) {
                 errors.handle = "That handle already exists!";
