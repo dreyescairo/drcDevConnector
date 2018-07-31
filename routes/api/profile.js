@@ -6,13 +6,13 @@ const mongoose = require("mongoose");
 
 const passport = require("passport");
 
-//load profile model
-const profile = require("../../models/Profile");
-
-const user = require("../../models/User");
-
 //load validation script
 const validateProfileInput = require("../../validation/profile");
+
+//load profile model
+const Profile = require("../../models/Profile");
+
+const User = require("../../models/User");
 
 //@route GET api/profile
 //@desc Get current users profile
@@ -25,10 +25,9 @@ router.get(
   (req, res) => {
     const errors = {};
 
-    profile
-      .findOne({
-        user: req.user.id
-      })
+    Profile.findOne({
+      user: req.user.id
+    })
       .then(profile => {
         if (!profile) {
           errors.noProfile = "There is no profile for this user.";
@@ -44,15 +43,13 @@ router.get(
 //@route POST api/profile
 //@desc Create or edit user profile
 //@access private
-router.post("/", passport.authenticate("jwt", {
+router.post(
+  "/",
+  passport.authenticate("jwt", {
     session: false
   }),
   (req, res) => {
-
-    const {
-      errors,
-      isValid
-    } = validateProfileInput(req.body);
+    const { errors, isValid } = validateProfileInput(req.body);
 
     //check validation
     if (!isValid) {
@@ -60,8 +57,8 @@ router.post("/", passport.authenticate("jwt", {
       return res.status(400).json(errors);
     }
 
-    //Get profile fields. We get our user because we are passing in a JWT with all the uder information.   
-    //get field data    
+    //Get profile fields. We get our user because we are passing in a JWT with all the uder information.
+    //get field data
     const profileFields = {};
     profileFields.user = req.user.id;
 
@@ -113,38 +110,53 @@ router.post("/", passport.authenticate("jwt", {
       profileFields.social.instagram = req.body.instagram;
     }
 
-    profile.findOne({
+    //imported model is uppercase!!! the profile var in .then(profile =>) is lowercase because it is a different variable
+    //what was happening is I imported 'profile' as lowercase, so when it hit .then(), it overwrote my model with the return value of the promise.
+    // I didn't want my model to change based on that, so I changed it to uppercase and the .then() variable to lowercase.
+    //This allowed me to keep the instance I had for Model, and have the return data in a lowercase profile model so I can manipulate it without
+    //overwriting my imported Profile model. Make sense? I hope so because this took me forever to pin point...
+    Profile.findOne({
       user: req.user.id
-    }).then(profile => {
-      if (profile) {
-        //update the profile
-        profile
-          .findOneAndUpdate({
-            user: req.user.id
-          }, {
-            $set: profileFields
-          }, {
-            new: true
-          }).then(profile => res.json(profile)).catch(err => console.log(err)); //Give the profile once we update.
-      } else {
-        //create the profile
+    })
+      .then(profile => {
+        if (profile) {
+          //update the profile
+          profile
+            .findOneAndUpdate(
+              {
+                user: req.user.id
+              },
+              {
+                $set: profileFields
+              },
+              {
+                new: true
+              }
+            )
+            .then(profile => res.json(profile))
+            .catch(err => console.log(err)); //Give the profile once we update.
+        } else {
+          //create the profile
 
-        //Check if handle exists
-        profile.findOne({
-          handle: profileFields.handle
-        }).then(profile => {
-          if (profile) {
-            errors.handle = "That handle already exists!";
-            res.status(400).json(errors);
-          }
-          //save profile
-          new profile(profileFields).save().then(profile => res.json(profile)).catch(err => console.log(err));
-
-
-
-        }).catch(err => console.log(err));
-      }
-    }).catch(err => console.log(err));
+          //Check if handle exists
+          Profile.findOne({
+            handle: profileFields.handle
+          })
+            .then(profile => {
+              if (profile) {
+                errors.handle = "That handle already exists!";
+                res.status(400).json(errors);
+              }
+              //save profile
+              new Profile(profileFields)
+                .save()
+                .then(profile => res.json(profile))
+                .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+        }
+      })
+      .catch(err => console.log(err));
   }
 );
 
