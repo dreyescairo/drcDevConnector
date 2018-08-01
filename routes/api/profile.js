@@ -343,7 +343,7 @@ router.delete('/experience/:exp_id', passport.authenticate('jwt', {
       const itemToRemoveIndex = profile.experience.map(item => item.id).indexOf(req.params.expo_id);
 
       //splice out of the array
-      profile.experience.splice(itemToRemoveInde, 1);
+      profile.experience.splice(itemToRemoveIndex, 1);
 
       //save
       profile.save().then(profile => res.json(profile));
