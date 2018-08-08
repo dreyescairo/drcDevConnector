@@ -12,7 +12,7 @@ class App extends Component {
         <div className="App">
           {/* imported components must have first letter Capital. */}
           <Navbar />
-          <Route path="/" component={Landing} />>
+          <Route path="/" component={Landing} />
           <Footer />
         </div>
       </Router>
