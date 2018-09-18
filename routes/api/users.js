@@ -18,7 +18,7 @@ const passport = require("passport");
 const validateRegistrationInput = require("../../validation/register");
 
 //Load login input validation
-const validateLoginInput = require('../../validation/login');
+const validateLoginInput = require("../../validation/login");
 
 //load user model
 const User = require("../../models/User");
@@ -32,15 +32,12 @@ router.get("/test", (req, res) =>
   })
 );
 
-//@route GET api/users/register
+//@route POST api/users/register
 //@desc register a user
 //@access public
 //This will use findone to check if the email from the form exists with a user already. (the user model we brought in)
 router.post("/register", (req, res) => {
-  const {
-    errors,
-    isValid
-  } = validateRegistrationInput(req.body);
+  const { errors, isValid } = validateRegistrationInput(req.body);
   //check validation 1st step
   if (!isValid) {
     return res.status(400).json(errors);
@@ -94,11 +91,7 @@ router.post("/register", (req, res) => {
 //@desc login a user / Returning JWT
 //@access public
 router.post("/login", (req, res) => {
-
-  const {
-    errors,
-    isValid
-  } = validateLoginInput(req.body);
+  const { errors, isValid } = validateLoginInput(req.body);
   //check validation 1st step
   if (!isValid) {
     return res.status(400).json(errors);
@@ -113,7 +106,7 @@ router.post("/login", (req, res) => {
   }).then(user => {
     //check for user
     if (!user) {
-      errors.email = 'User not found!';
+      errors.email = "User not found!";
       return res.status(404).json(errors);
     }
 
@@ -130,7 +123,8 @@ router.post("/login", (req, res) => {
         //assign token
         jwt.sign(
           payload,
-          keys.secretOrKey, {
+          keys.secretOrKey,
+          {
             expiresIn: 3600
           },
           (err, token) => {
@@ -141,7 +135,7 @@ router.post("/login", (req, res) => {
           }
         );
       } else {
-        errors.password = 'Password is incorrect!';
+        errors.password = "Password is incorrect!";
         return res.status(400).json(errors);
       }
     });
@@ -157,7 +151,6 @@ router.get(
     session: false
   }),
   (req, res) => {
-
     const errors = {};
     //I got a user back from authenticationg in passport.js, from that user respond the properties that I want in json format.
     res.json({
