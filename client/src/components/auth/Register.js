@@ -33,6 +33,8 @@ class Register extends Component {
       password: this.state.password,
       passwordConfirm: this.state.passwordConfirm
     };
+
+    //TODO: Get this into a repository and figure out what to do with the promise return.
     axios
       .post("/api/users/register", newUser)
       .then(res => console.log(res.data))
