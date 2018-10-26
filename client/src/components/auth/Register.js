@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import { AuthenticationRepository } from "../../repositories/AuthenticationRepository";
 
 class Register extends Component {
   constructor() {
@@ -24,7 +25,7 @@ class Register extends Component {
     });
   }
 
-  onSubmit(event) {
+  async onSubmit(event) {
     event.preventDefault();
 
     const newUser = {
@@ -33,12 +34,17 @@ class Register extends Component {
       password: this.state.password,
       passwordConfirm: this.state.passwordConfirm
     };
-
+    let repo = new AuthenticationRepository();
     //TODO: Get this into a repository and figure out what to do with the promise return.
-    axios
-      .post("/api/users/register", newUser)
-      .then(res => console.log(res.data))
-      .catch(err => console.log(err.response.data));
+    // axios
+    //   .post("/api/users/register", newUser)
+    //   .then(res => console.log(res.data))
+    //   .catch(err => console.log(err.response.data));
+
+    //Got the call working from a repository!!
+    let response = await repo.getData();
+
+    console.log(response[2]);
   }
 
   render() {

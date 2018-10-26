@@ -1,16 +1,17 @@
 import axios from "axios";
-import { resolve } from "dns";
-//TRY AND  IMPLEMENT THE REPOSITORY PATTERN!!!
-let userRepository = () => {
-  let registerUser = newUser => {
-    return new Promise((resolve, reject) => {
-      axios
-        .post("/api/users/register", newUser)
-        .then(res => console.log(res.data))
-        .catch(err => console.log(err.response.data));
 
-      //resolve(res.data)
-      //reject(err.response.data);
-    });
-  };
-};
+export class AuthenticationRepository {
+  constructor() {}
+
+  async getData() {
+    let resp = "";
+    const response = await axios
+      .get("https://jsonplaceholder.typicode.com/posts")
+      .then(res => (resp = res.data))
+      .catch(err => console.log(err.response.data));
+
+    return resp;
+  }
+
+  //TRY AND  IMPLEMENT THE REPOSITORY PATTERN!!!
+}
